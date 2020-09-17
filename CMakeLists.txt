@@ -150,6 +150,9 @@ add_executable(stereo_tum_vi
 Examples/Stereo/stereo_tum_vi.cc)
 target_link_libraries(stereo_tum_vi ${PROJECT_NAME})
 
+add_executable(stereo_fpv
+Examples/Stereo/stereo_fpv.cpp)
+target_link_libraries(stereo_fpv ${PROJECT_NAME})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
 
@@ -169,6 +172,9 @@ add_executable(mono_tum_vi
 Examples/Monocular/mono_tum_vi.cc)
 target_link_libraries(mono_tum_vi ${PROJECT_NAME})
 
+add_executable(mono_fpv
+Examples/Monocular/mono_fpv.cpp)
+target_link_libraries(mono_fpv ${PROJECT_NAME})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular-Inertial)
 

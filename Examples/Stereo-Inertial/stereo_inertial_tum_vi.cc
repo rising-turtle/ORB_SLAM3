@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     if (bFileName)
         file_name = string(argv[argc-1]);
 
-    if(argc < 7) 
+    if(argc < 7)
     {
         cerr << endl << "Usage: ./stereo_inertial_tum_vi path_to_vocabulary path_to_settings path_to_image_folder_1 path_to_image_folder_2 path_to_times_file path_to_imu_data (trajectory_file_name)" << endl;
         return 1;

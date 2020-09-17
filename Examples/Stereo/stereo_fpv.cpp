@@ -1,7 +1,7 @@
 /*
-  Sep. 16, 2020, He Zhang, hzhang8@vcu.edu
+  Sep. 17, 2020, He Zhang, hzhang8@vcu.edu
 
-  stereo inertial using FPV dataset
+  stereo vo using FPV dataset
 
   TODO: add support multi sequences input
 
@@ -18,17 +18,11 @@
 #include<opencv2/core/core.hpp>
 
 #include<System.h>
-#include "ImuTypes.h"
 
 using namespace std;
 
-// void LoadImages(const string &strPathLeft, const string &strPathRight, const string &strPathTimes,
-//                vector<string> &vstrImageLeft, vector<string> &vstrImageRight, vector<double> &vTimeStamps);
-
 void LoadImages(const string& path, const string &strImgLeft, const string &strImgRight,
                 vector<string> &vstrImageLeft, vector<string> &vstrImageRight, vector<double> &vTimeStamps);
-
-void LoadIMU(const string &strImuPath, vector<double> &vTimeStamps, vector<cv::Point3f> &vAcc, vector<cv::Point3f> &vGyro);
 
 double ttrack_tot = 0;
 
@@ -85,71 +79,15 @@ int main(int argc, char **argv)
 
         cout << "LOADED!" << endl;
 
-        cout << "Loading IMU for sequence " << seq << "...";
-        string imu_file = data_path + "/imu.txt";
-        // LoadIMU(string(argv[4*(seq+1)+2]), vTimestampsImu[seq], vAcc[seq], vGyro[seq]);
-        LoadIMU(imu_file, vTimestampsImu[seq], vAcc[seq], vGyro[seq]);
-
-        cout << "Total IMU meas: " << vTimestampsImu[seq].size() << endl;
-        cout << "first IMU ts: " << vTimestampsImu[seq][0] << endl;
-        cout << "LOADED!" << endl;
-
         nImages[seq] = vstrImageLeftFilenames[seq].size();
         tot_images += nImages[seq];
-        nImu[seq] = vTimestampsImu[seq].size();
 
-        if((nImages[seq]<=0)||(nImu[seq]<=0))
+        if((nImages[seq]<=0))
         {
-            cerr << "ERROR: Failed to load images or IMU for sequence" << seq << endl;
+            cerr << "ERROR: Failed to load images sequence" << seq << endl;
             return 1;
         }
-
-        // Find first imu to be considered, supposing imu measurements start first
-
-        while(vTimestampsImu[seq][first_imu[seq]]<=vTimestampsCam[seq][0])
-            first_imu[seq]++;
-        first_imu[seq]--; // first imu measurement to be considered
-
     }
-
-    // Read rectification parameters
-    // cv::FileStorage fsSettings(argv[2], cv::FileStorage::READ);
-    // if(!fsSettings.isOpened())
-    // {
-    //     cerr << "ERROR: Wrong path to settings" << endl;
-    //     return -1;
-    // }
-    //
-    // cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r;
-    // fsSettings["LEFT.K"] >> K_l;
-    // fsSettings["RIGHT.K"] >> K_r;
-    //
-    // fsSettings["LEFT.P"] >> P_l;
-    // fsSettings["RIGHT.P"] >> P_r;
-    //
-    // fsSettings["LEFT.R"] >> R_l;
-    // fsSettings["RIGHT.R"] >> R_r;
-    //
-    // fsSettings["LEFT.D"] >> D_l;
-    // fsSettings["RIGHT.D"] >> D_r;
-    //
-    // int rows_l = fsSettings["LEFT.height"];
-    // int cols_l = fsSettings["LEFT.width"];
-    // int rows_r = fsSettings["RIGHT.height"];
-    // int cols_r = fsSettings["RIGHT.width"];
-    //
-    // cout <<"rows_l: "<<rows_l<<" cols_l: "<<cols_l<<endl;
-    //
-    // if(K_l.empty() || K_r.empty() || P_l.empty() || P_r.empty() || R_l.empty() || R_r.empty() || D_l.empty() || D_r.empty() ||
-    //         rows_l==0 || rows_r==0 || cols_l==0 || cols_r==0)
-    // {
-    //     cerr << "ERROR: Calibration parameters to rectify stereo are missing!" << endl;
-    //     return -1;
-    // }
-    //
-    // cv::Mat M1l,M2l,M1r,M2r;
-    // cv::fisheye::initUndistortRectifyMap(K_l,D_l,R_l,P_l,cv::Size(cols_l,rows_l),CV_32F,M1l,M2l);
-    // cv::fisheye::initUndistortRectifyMap(K_r,D_r,R_r,P_r,cv::Size(cols_r,rows_r),CV_32F,M1r,M2r);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
@@ -158,12 +96,9 @@ int main(int argc, char **argv)
     cout << endl << "-------" << endl;
     cout.precision(17);
 
-    /*cout << "Start processing sequence ..." << endl;
-    cout << "Images in the sequence: " << nImages << endl;
-    cout << "IMU data in the sequence: " << nImu << endl << endl;*/
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_STEREO, true, 0, file_name);
+    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::STEREO, true);
 
     int proccIm = 0;
     cv::Mat imLeft, imRight, imLeftRect, imRightRect;
@@ -198,24 +133,6 @@ int main(int argc, char **argv)
                 return 1;
             }
 
-
-            // Load imu measurements from previous frame
-            vImuMeas.clear();
-
-            if(ni>0)
-            {
-                // cout << "t_cam " << tframe << endl;
-
-                while(vTimestampsImu[seq][first_imu[seq]]<=vTimestampsCam[seq][ni])
-                {
-                    // vImuMeas.push_back(ORB_SLAM3::IMU::Point(vAcc[first_imu],vGyro[first_imu],vTimestampsImu[first_imu]));
-                    vImuMeas.push_back(ORB_SLAM3::IMU::Point(vAcc[seq][first_imu[seq]].x,vAcc[seq][first_imu[seq]].y,vAcc[seq][first_imu[seq]].z,
-                                                             vGyro[seq][first_imu[seq]].x,vGyro[seq][first_imu[seq]].y,vGyro[seq][first_imu[seq]].z,
-                                                             vTimestampsImu[seq][first_imu[seq]]));
-                    // cout << "t_imu = " << fixed << vImuMeas.back().t << endl;
-                    first_imu[seq]++;
-                }
-            }
 
             /*cout << "first imu: " << first_imu[seq] << endl;
             cout << "first imu time: " << fixed << vTimestampsImu[seq][0] << endl;
@@ -349,43 +266,5 @@ void LoadImages(const string& path, const string &strImgLeft, const string &strI
 
     }
     cout <<" stereo_inertial_fpv_vi.cpp: LoadImages have "<<vTimeStamps.size()<<" stereo images"<<endl;
-    return ;
-}
-
-void LoadIMU(const string &strImuPath, vector<double> &vTimeStamps, vector<cv::Point3f> &vAcc, vector<cv::Point3f> &vGyro)
-{
-    ifstream fImu;
-    fImu.open(strImuPath.c_str());
-    vTimeStamps.reserve(5000);
-    vAcc.reserve(5000);
-    vGyro.reserve(5000);
-
-    if(!fImu.is_open()){
-      cerr << "stereo_inertial_fpv_vi.cpp: failed to read imu file at "<<strImuPath<<endl;
-      return;
-    }
-
-    while(!fImu.eof())
-    {
-        string s;
-        getline(fImu,s);
-        if (s[0] == '#')
-            continue;
-
-        int id;
-        double timestamp;
-        double ax, ay, az, gx, gy, gz;
-        if(!s.empty()){
-          stringstream ss;
-          ss << s;
-          ss >> id >> timestamp >> gx >> gy >> gz >> ax >> ay >> az;
-
-          vTimeStamps.push_back(timestamp);
-          vAcc.push_back(cv::Point3f(ax, ay, az));
-          vGyro.push_back(cv::Point3f(gx, gy, gz));
-        }
-    }
-
-    cout << "stereo_inertial_fpv_vi.cpp: succeed to read "<<vTimeStamps.size()<<" imu measurements"<<endl;
     return ;
 }
