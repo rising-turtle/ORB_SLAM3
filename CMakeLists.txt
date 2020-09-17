@@ -191,3 +191,7 @@ target_link_libraries(stereo_inertial_euroc ${PROJECT_NAME})
 add_executable(stereo_inertial_tum_vi
 Examples/Stereo-Inertial/stereo_inertial_tum_vi.cc)
 target_link_libraries(stereo_inertial_tum_vi ${PROJECT_NAME})
+
+add_executable(stereo_inertial_fpv_vi
+Examples/Stereo-Inertial/stereo_inertial_fpv_vi.cpp)
+target_link_libraries(stereo_inertial_fpv_vi ${PROJECT_NAME})
