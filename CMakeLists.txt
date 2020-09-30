@@ -176,6 +176,10 @@ add_executable(mono_fpv
 Examples/Monocular/mono_fpv.cpp)
 target_link_libraries(mono_fpv ${PROJECT_NAME})
 
+add_executable(mono_test
+Examples/Monocular/mono_test_cam.cpp)
+target_link_libraries(mono_test ${PROJECT_NAME})
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular-Inertial)
 
 add_executable(mono_inertial_euroc
@@ -186,6 +190,9 @@ add_executable(mono_inertial_tum_vi
 Examples/Monocular-Inertial/mono_inertial_tum_vi.cc)
 target_link_libraries(mono_inertial_tum_vi ${PROJECT_NAME})
 
+add_executable(mono_inertial_test
+Examples/Monocular-Inertial/test_orb.cpp)
+target_link_libraries(mono_inertial_test ${PROJECT_NAME})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Stereo-Inertial)
 
