@@ -37,8 +37,8 @@ Tbc: !!opencv-matrix
          0.0, 0.0, 0.0, 1.0]
 
 # IMU noise
-IMU.NoiseGyro: 4.0e-4 #1.6968e-04 
-IMU.NoiseAcc: 8.0e-3 #2.0e-3
+IMU.NoiseGyro: 0.04 #4.0e-4 #1.6968e-04 
+IMU.NoiseAcc: 0.004 #8.0e-3 #2.0e-3
 IMU.GyroWalk: 2.0e-5 
 IMU.AccWalk: 3.0e-3 # 3e-03
 IMU.Frequency: 200
